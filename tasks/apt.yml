@@ -1,0 +1,14 @@
+---
+- name: Wait for AWS to complete APT tasks.
+  pause:
+    minutes: "2"
+  when: packer_build_name == "ami"
+- name: Update apt Cache
+  apt: 
+    update_cache: yes
+    force_apt_get: yes
+- name: Install Apt Packages
+  apt:
+    name: "{{ apt_packages }}"
+    state: present
+    force_apt_get: yes

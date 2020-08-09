@@ -1,0 +1,13 @@
+- name: Copy systemd service file for AMI
+  template:
+    src: templates/app.service
+    dest: /etc/systemd/system/app.service
+    owner: root
+    group: root
+  when: packer_build_name == "ami"
+- name: enable a timer for dnf-automatic
+  systemd:
+    name: app.service
+    state: started
+    enabled: yes
+  when: packer_build_name == "ami"

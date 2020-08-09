@@ -1,0 +1,21 @@
+- name: Update configure-app command
+  copy:
+    content: "{{ configuration_script | default('# No Custom Configuration') }}"
+    dest: /bin/configure-app
+    owner: root
+    group: root
+    mode: '0755'
+- name: Update appboot command
+  copy:
+    content: "{{ run_script | default('tail -f /dev/null') }}"
+    dest: /bin/appboot
+    owner: root
+    group: root
+    mode: '0755'
+- name: Update artifact fetch
+  copy:
+    dest: /bin/fetch-artifacts
+    owner: root
+    group: root
+    mode: '0755'
+    content: "{{ artifact_script | default('# No Artifacts')}}"

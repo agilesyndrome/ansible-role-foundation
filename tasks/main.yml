@@ -1,0 +1,27 @@
+---
+- include_tasks: tasks/apt.yml
+  vars:
+    apt_packages:
+      - apt-transport-https
+      - build-essential
+      - ca-certificates
+      - curl
+      - git
+      - groff
+      - jq
+      - make
+      - pkg-config
+      - software-properties-common
+      - unzip
+      - wget
+      - zip
+- include_tasks: tasks/pip.yml
+  vars:
+    pip_packages:
+      - awscli
+- include_tasks: tasks/appbot.yml
+- include_tasks: tasks/binfiles.yml
+- include_tasks: tasks/appboot.yml
+- include_tasks: tasks/confd.yml
+- include_tasks: tasks/env_vars.yml
+- include_tasks: tasks/systemd.yml

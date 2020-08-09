@@ -1,0 +1,12 @@
+REPO=$(env-or-tag Repo)
+BRANCH=$(env-or-tag Branch)
+
+if [ -z "${REPO}" ]; then
+  echo "REPO tag/env var was not defined!. Cannot continue."
+  exit 1
+fi
+
+echo "Git Fetching branch ${BRANCH} from ${REPO} to /workspace/app"
+
+git clone ${REPO} /workspace/app
+(cd /workspace/app; git checkout ${BRANCH})

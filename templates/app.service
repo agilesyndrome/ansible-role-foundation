@@ -1,0 +1,17 @@
+[Unit]
+Description={{ image }} service.
+
+[Service]
+ExecStart=/bin/appboot-wrapper
+SyslogIdentifier={{ image }}
+WorkingDirectory=/workspace
+Type=simple
+User=appbot
+Group=appbot
+Restart=always
+RestartSec=1s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

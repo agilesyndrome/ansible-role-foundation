@@ -1,0 +1,35 @@
+#!/bin/bash
+
+## Return an ENV var if it exists, an AWS Tag value if it does not, and finally a default value if all else fails
+## Supports running in both Docker & AWS
+
+## Usage: ./env-or-tag Environment dev
+## Will first return ENV['Environment'], then tag:Environment from AWS, and finally the static value 'dev'
+
+if [ -z "${1}" ]; then
+    echo "Usage: ${0} Name DefaultValue"
+    exit 1
+fi
+
+AWS_REGION=${AWS_REGION:-us-east-1}
+TAG_NAME=${1}
+DEFAULT_VALUE=${2}
+
+# Rule #1: Return the ENV var if it exists
+if [ -n "${!TAG_NAME}" ]; then
+  echo ${!TAG_NAME}
+  exit 0
+fi
+
+
+MY_ID=$(my-id)
+# Rule #2: In non-AWS, when the ENV var does not exist return the default value.
+if [ "${MY_ID}" == "0" ]; then
+  echo "${DEFAULT_VALUE}"
+  exit 0
+fi
+
+# Rule #3: Return the AWS Tag value, or default value if the instance is not tagged
+AWS_INSTANCE_INFO=$(aws ec2 describe-instances --instance-id ${MY_ID})
+TAG_VALUE=$(echo ${AWS_INSTANCE_INFO} | jq --arg tag "${TAG_NAME}" -r '.Reservations[0] .Instances[0] .Tags// [{'Key':null,'Value':null}] | .[]| select(.Key==$tag)|.Value')
+echo ${TAG_VALUE:-${DEFAULT_VALUE}}
