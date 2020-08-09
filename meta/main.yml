@@ -1,7 +1,7 @@
 # meta file for wordpress
 ---
 galaxy_info:
-  role_name: syndrome.foundation
+  role_name: syndrome-foundation
   author: Drew E. Easley
   company: AgileSyndrome
   description: Support Docker and AMI images for projects
