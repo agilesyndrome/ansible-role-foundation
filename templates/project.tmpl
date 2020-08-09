@@ -2,5 +2,5 @@ export IMAGE_BUILD_NAME="{{ packer_build_name }}"
 export IMAGE_BUILD_TYPE="{{ packer_builder_type }}"
 export IMAGE_NAME="{{ image }}"
 export IMAGE_CREATED="{{ created }}"
-export AWS_REGION=us-east-1
-export AWS_DEFAULT_REGION=us-east-1
+export AWS_REGION=${AWS_REGION:-us-east-1}
+export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
