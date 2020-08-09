@@ -1,0 +1,18 @@
+# meta file for wordpress
+---
+galaxy_info:
+  role_name: foundation
+  author: Drew E. Easley
+  company: AgileSyndrome
+  description: Support Docker and AMI images for projects
+  license: MIT
+  min_ansible_version: 2.6.0
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+  galaxy_tags:
+    - os
+    - agilesyndrome
+dependencies: []
