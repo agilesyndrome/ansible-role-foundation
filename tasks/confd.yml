@@ -38,7 +38,7 @@
     group: root
 - name: Fetch global conf.d configuration
   copy:
-    src: files/config/
+    src: config/
     dest: /config/
     owner: appbot
     group: appbot

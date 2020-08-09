@@ -1,6 +1,6 @@
 - name: Copy bin files
   copy:
-    src: files/bin/
+    src: bin/
     dest: /bin/
     owner: root
     group: root
