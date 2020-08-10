@@ -10,6 +10,7 @@
       - groff
       - jq
       - make
+      - nfs-client
       - pkg-config
       - software-properties-common
       - unzip
