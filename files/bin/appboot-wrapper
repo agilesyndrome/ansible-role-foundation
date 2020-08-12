@@ -9,17 +9,13 @@
 # [Step 1] Source necessary env vars
 . /etc/environment
 
-# [Step 2a] Run and fetch custom app-based config sets
-/bin/configure-app
-
-# [Step 2b] Run ConfD to translate variables from above into actual data
-/bin/conf-update
-
-# [Step 3] Fetch latest artifacts, but allow IMAGE_SKIP_ARTIFACT a change to prevent this. 
-
+# [Step 2] Download any required remote artifacts
 if [ -z "${IMAGE_SKIP_ARTIFACT}" ]; then
     /bin/fetch-artifacts
 fi
+
+# [Step 3] Run app specific configuration requirements
+/bin/conf-update
 
 # [Step 4] Boot application
 /bin/appboot
