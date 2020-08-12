@@ -1,1 +1,7 @@
-mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport $(env-or-tag EfsIp):$(env-or-tag EfsMount '/') $(env-or-tag EfsLocal '/workspace')
+EFS_IP=${1}
+EFS_MOUNTSOURCE=${2:/}
+EFS_MOUNTTARGET=${3:/workspace}
+mount \
+    -t nfs4 \
+    -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport \
+    ${EFS_IP}:${EFS_MOUNTSOURCE} ${EFS_MOUNTTARGET}

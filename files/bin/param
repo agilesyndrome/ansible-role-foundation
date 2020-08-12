@@ -1,0 +1,266 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+action=${1}
+param2=${2}
+param3=${3}
+param4=${4}
+
+CONFIRM_PATTERN=".*--confirm$"
+
+set -e
+
+if [ -z "${Project}" ]; then
+  echo "Could not determine Project! Are you sure Env/Tag Project is set?"
+  exit 1
+fi
+
+function require {
+  if [ -z "${!1}" ]; then
+        echo "----------------------------------"
+	echo "Error> Parameter "${1}" is required."
+	param_help ${2}
+	exit 1
+  fi
+
+}
+
+param_id="The name of the parameter"
+optional_param_id="[Optional] parameter folder to scope to"
+value="The value of the parameter"
+param_version="The version (integer) of the parameter"
+tag_label="a descriptive word"
+dest_project="The destination project"
+dest_environment="The destination environment"
+
+function usage_helper {
+	printf '=%.0s' {1..50}
+	echo ""
+	echo "${1} :: ${2}"
+	printf '=%.0s' {1..50}
+	echo ""
+	echo ""
+	echo "Usage: param ${1} ${HELP_ARGS[@]}"
+	echo ""
+	for usageParam in ${HELP_ARGS[@]};
+	do
+		echo "  ${usageParam} :: ${!usageParam}"
+	done
+	
+	echo ""
+	echo "Example: "
+	echo "   param ${1} ${3}"
+
+	#Support optional examples
+	if [ -n "${4}" ]; then
+		echo "   param ${1} ${4}"
+	fi
+	echo ""
+}
+
+function param_help {
+
+HELP_ARGS=(param_id)
+
+case "${1}" in
+clone)
+	HELP_ARGS=(dest_project dest_environment)
+	usage_helper "clone" "create a script that can clone an entire group of secrets" "nginx staging2"
+	;;
+decrypt)
+    usage_helper "decrypt" "decrypts a secure secret" "db/password"
+	;;
+delete)
+	usage_helper "delete" "delete a parameter" "db/useramen [--confirm]"
+	;;
+encrypt)
+	HELP_ARGS=(param_id value)
+	usage_helper "encrypt" "encrypt a secure secret" "db/password 'P@ssword'"
+	;;
+envs)
+	HELP_ARGS=()
+	usage_helper "envs" "show all environments" ""
+	;;
+history)
+	usage_helper "history" "show history of a parameter's changes" "db/port"
+	;;
+keys)
+	HELP_ARGS=(optional_param_id)
+	usage_helper "keys" "show top level keys for a parameter set" "" "db"
+	;;
+list)
+	HELP_ARGS=(optional_param_id)
+	usage_helper "list" "list all project parameters" "" "db"
+	;;
+new)
+	HELP_ARGS=(param_id value)
+	usage_helper "new" "create a new parameter" "db/port 3306"
+	;;
+projects)
+	HELP_ARGS=()
+	usage_helper "projects" "show all projects" ""
+	;;
+purge)
+	HELP_ARGS=(param_id)
+	usage_helper "purge" "remove all keys from a tree" "db [--confirm]"
+	;;
+read)
+	usage_helper "read" "show a parameter value" "db/port"
+	;;
+scope)
+	HELP_ARGS=(optional_param_id)
+	usage_helper "scope" "show full AWS SSM key value" "" "db"
+	;;
+tag)
+	HELP_ARGS=(param_id param_version tag_label)
+	usage_helper "tag" "label a parameter with a descriptive tag" "cache/ttl 4 unstable"
+	;;
+update)
+	HELP_ARGS=(param_id value)
+	usage_helper "update" "update an existing parameter's value" "db/port 3306"
+	;;
+*)
+	echo "Usage: param"
+	echo "  help [command]"
+	echo "  list                   :: List all parameters"
+	echo "  new                    :: Create a new parameter"
+	echo "  read                   :: Read a parameter value"
+	echo "  update                 :: Update a parameter's value"
+	echo "  encrypt / decrypt      :: Work with secure keys"
+	echo "  delete / purge         :: Remove keys"
+	echo "  clone                  :: Copy an environment to a new one"
+	echo "  history                :: Show parameter value changes"
+	echo "  scope                  :: Show the full AWS KMS Key"
+	echo "  projects / envs / keys :: Show top-level information"
+	;;
+esac
+}
+
+function set_kv_scope {
+	export KV_SCOPE=${1}
+}
+
+function param_clone {
+	require param3 clone
+	echo "# Run this script to clone ${Project}/${Environment}"
+	echo "export Project=${param2}"
+	echo "export Environment=${param3}"
+	aws ssm get-parameters-by-path --path "/${Project}/${Environment}" --recursive --query 'Parameters' | jq -r '.[] |select(.Type=="String")|("param new " + .Name + " \"" + .Value + "\"")' | sed "s:/${Project}/${Environment}/::g"
+	aws ssm get-parameters-by-path --path "/${Project}/${Environment}" --recursive --query 'Parameters' | jq -r '.[] |select(.Type=="SecureString")|("param encrypt " + .Name + " \"===REDACTED_VALUE===\"")' | sed "s:/${Project}/${Environment}/::g"
+	echo ""
+}
+
+function param_decrypt {
+	require param2 decrypt
+	aws ssm get-parameter --with-decryption --name "/${Project}/${Environment}/${param2}" --query 'Parameter .Value' | sed 's/"//g'
+}
+
+function param_delete {
+	require param2 delete
+	if [[ "${param2}${param3}" =~ ${CONFIRM_PATTERN} ]]; then
+		echo "Deleting /${Project}/${Environment}/${param2}"
+		aws ssm delete-parameter --name "/${Project}/${Environment}/${param2}" | jq
+	else
+		echo "Will not delete /${Project}/${Environment}/${param2} without --confirm flag"
+	fi
+}
+
+function param_encrypt {
+	require param3 encrypt
+	OLD_VALUE=$(param_read $@ 2> /dev/null)
+	if [ -n "${OLD_VALUE}" ]; then
+		echo "Param> Updating existing encrypted parameter $param2"
+		param_update $@
+	else
+		echo "Param> Creating new encrypted parameter $param2"
+		ParamType=SecureString param_new $@
+	fi
+	
+}
+
+# Helper Function to look up in scope to all projects
+function param_projects {
+	set_kv_scope "/"
+	aws ssm get-parameters-by-path --path "${KV_SCOPE}" --recursive --query 'Parameters[*] .Name' | jq -r '.[]' | sed "s:^${KV_SCOPE}::g" | awk '{split($0,a,"/"); print a[1]}' | uniq
+}
+
+# Helper Function to look up in scope to environments
+function param_envs {
+	set_kv_scope "/${Project}/"
+	aws ssm get-parameters-by-path --path "${KV_SCOPE}" --recursive --query 'Parameters[*] .Name' | jq -r '.[]' | sed "s:^${KV_SCOPE}::g" | awk '{split($0,a,"/"); print a[1]}' | uniq
+}
+
+function param_keys {
+	set_kv_scope "/${Project}/${Environment}/${param2}"
+
+	#In this case, KV_SCOPE must end with a /, and never two //
+	if [[ ! "${KV_SCOPE}" =~ ^/.*\/$ ]]; then
+		KV_SCOPE=${KV_SCOPE}/
+	fi
+
+	aws ssm get-parameters-by-path --path "${KV_SCOPE}" --recursive --query 'Parameters[*] .Name' | jq -r '.[]' | sed "s:^${KV_SCOPE}::g" | awk '{split($0,a,"/"); print a[1]}' | uniq
+}
+
+function param_history {
+	require param2 history
+	#For performance, limit to the most recent 15 results
+	aws ssm get-parameter-history --name "/${Project}/${Environment}/${param2}" --query 'reverse(sort_by(Parameters,&Version)[:15])' |jq 'map({("v"+(.Version|tostring)): .Value})|add'
+}
+
+function param_list {
+	aws ssm get-parameters-by-path --path "${KV_SCOPE}" --recursive --query 'Parameters[*] .Name' | jq -r '.[]' | sed "s:^/${Project}/${Environment}/::g" || echo "e"
+}
+
+function param_purge {
+	# Handle case of confirming purge of all keys.
+	if [ "${param2}" == "--confirm" ]; then
+		param3="--confirm"
+		param2=""
+	fi
+
+	param_list ${param2} | while read p
+	do
+		param2=${p} param_delete
+	done 
+
+}
+
+function param_new {
+	require param3 new
+	aws ssm put-parameter --name "/${Project}/${Environment}/${param2}" --value "${param3}" --type "${ParamType:-String}" --query 'Version' | jq
+}
+
+function param_read {
+	require param2 read
+	aws ssm get-parameter --name "/${Project}/${Environment}/${param2}" --query 'Parameter .Value' | sed 's/"//g'
+}
+
+function param_scope {
+	echo "${KV_SCOPE}"
+}
+
+function param_tag {
+	require param4
+	aws ssm label-parameter-version --name "/${Project}/${Environment}/${param2}" --parameter-version "${param3}" --labels "${param4}" | jq
+}
+
+function param_update {
+	require param3
+	OLD_VALUE=$(param_read "${Project}/${Environment}/${param2}")
+	if [ -n "${OLD_VALUE}" ]; then
+		aws ssm put-parameter --name "/${Project}/${Environment}/${param2}" --value "${param3}" --overwrite --query 'Version' |jq
+		if [ "${action}" != "encrypt" ]; then
+			echo "Changed ${param2} from ${OLD_VALUE} --> ${param3}"
+		fi
+	else
+		echo "?? Cannot update parameter ${param2}. It has no old value."
+	fi
+}
+
+require action
+shift;
+
+set_kv_scope "/${Project}/${Environment}"
+param_"${action}" "$@"

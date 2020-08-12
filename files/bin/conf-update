@@ -1,7 +1,0 @@
-#!/bin/bash
-
-APP_PROJECT=$(env-or-tag Project base)
-APP_ENV=$(env-or-tag Environment development)
-
-IMAGE_PREFIX=$(echo ${APP_PROJECT}/${APP_ENV}| tr '[:upper:]' '[:lower:]')
-confd --onetime --prefix /${IMAGE_PREFIX}

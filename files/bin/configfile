@@ -1,0 +1,93 @@
+#!/bin/bash
+#set -e
+backend=${1}
+param2=${2}
+
+CONFD_LOCATION=$(command -v confd)
+if [ $? -gt 0 ]; then
+    echo "Error : confd must be on the system path."
+    echo "Instructions to download it available at: https://github.com/kelseyhightower/confd/blob/master/docs/installation.md"
+    exit 1
+fi
+
+function usage {
+    echo "Usage: cat config.template | configfile <backend>"
+    echo "  Backends: [env, ssm]"
+    echo "  env: Read from ENV Vars"
+    echo "  ssm: Read from AWS Systems Manager Parameters"
+    exit 0
+}
+
+
+
+function process {
+    config_prefix=$(echo $1 | tr '[:upper:]' '[:lower:]')
+    TEMP_FOLDER=$(mktemp -d)
+    mkdir -p ${TEMP_FOLDER}/conf.d ${TEMP_FOLDER}/templates
+    cd ${TEMP_FOLDER}
+
+    
+    cat /dev/stdin > ${PWD}/templates/config.tmpl
+
+    if [ ! -f "${PWD}/templates/config.tmpl" ]; then
+        usage
+    fi
+
+    
+
+    standard_template > ${PWD}/conf.d/config.toml
+    confd --onetime -confdir ${PWD} -backend ${backend} --prefix ${config_prefix} >${PWD}/config.log 2> ${PWD}/config.log
+    
+    if [ -f ${PWD}/config.out ]; then
+        cat ${PWD}/config.out
+    else
+        echo "=== Configuration Error Occurred ==="
+        echo "Prefix: ${config_prefix}"
+        echo "Backend: ${backend}"
+
+        cat ${PWD}/config.log
+        echo ""
+        cat ${PWD}/conf.d/config.toml
+    fi
+}
+
+function standard_template {
+    cat << ENDCAT 
+[template]
+src = "config.tmpl"
+dest = "${PWD}/config.out"
+keys = ["/"]
+ENDCAT
+}
+
+
+if [ -z "${backend}" ]; then
+    usage
+    exit 1
+fi
+
+# Determine our Config Scope
+case ${backend} in
+help)
+    usage
+    exit 0
+    ;;
+env)
+    config_scope="/${param2}"
+    ;;
+ssm)
+    config_scope="/${Project}/${Environment}/${param2}"
+    ;;
+*)
+    usage
+    exit 1
+esac
+
+process ${config_scope}
+
+mv ${TEMP_FOLDER}/config.log ~/config.oog
+
+# Cleanup Time
+if [ -d ${TEMP_FOLDER} ]; then
+    rm -rf ${TEMP_FOLDER:-/this/will/never/exit/just/in/case}
+fi

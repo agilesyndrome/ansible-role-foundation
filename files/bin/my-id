@@ -1,10 +1,4 @@
 #!/bin/bash
 
-## If we're running an AWS AMI instance, this will return the instance-id, otherwise, it just returns '0'
-
-if [ "${IMAGE_BUILD_NAME}" == "ami" ]; then
-  echo $(curl --silent http://169.254.169.254/2019-10-01/meta-data/instance-id)
-  exit 0
-fi
-
-echo 0
+# Get an instances AWS InstanceID
+echo $(curl --silent --connect-timeout 2 http://169.254.169.254/2019-10-01/meta-data/instance-id)

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+TAG_NAME=${1}
+
+MY_ID=$(curl --silent --connect-timeout 2 http://169.254.169.254/2019-10-01/meta-data/instance-id)
+
+AWS_INSTANCE_INFO=$(aws ec2 describe-instances --instance-id ${MY_ID})
+TAG_VALUE=$(echo ${AWS_INSTANCE_INFO} | jq --arg tag "${TAG_NAME}" -r '.Reservations[0] .Instances[0] .Tags// [{'Key':null,'Value':null}] | .[]| select(.Key==$tag)|.Value')
+echo ${TAG_VALUE}
