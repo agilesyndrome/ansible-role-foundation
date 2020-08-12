@@ -28,14 +28,6 @@
     state: directory
     owner: root
     group: root
-- name: Confd Config file
-  copy:
-    content: |
-      backend = "ssm"
-      confdir = "/config"
-    dest: /etc/confd/confd.toml
-    owner: root
-    group: root
 - name: Fetch global conf.d configuration
   copy:
     src: config/

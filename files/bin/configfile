@@ -27,9 +27,9 @@ function process {
     cd ${TEMP_FOLDER}
 
     
-    cat /dev/stdin > ${PWD}/templates/config.tmpl
+    cat /dev/stdin > ${TEMP_FOLDER}/templates/config.tmpl
 
-    if [ ! -f "${PWD}/templates/config.tmpl" ]; then
+    if [ ! -f "${TEMP_FOLDER}/templates/config.tmpl" ]; then
         usage
     fi
 
@@ -38,16 +38,16 @@ function process {
     standard_template > ${PWD}/conf.d/config.toml
     confd --onetime -confdir ${PWD} -backend ${backend} --prefix ${config_prefix} >${PWD}/config.log 2> ${PWD}/config.log
     
-    if [ -f ${PWD}/config.out ]; then
-        cat ${PWD}/config.out
+    if [ -f ${TEMP_FOLDER}/config.out ]; then
+        cat ${TEMP_FOLDER}/config.out
     else
         echo "=== Configuration Error Occurred ==="
         echo "Prefix: ${config_prefix}"
         echo "Backend: ${backend}"
 
-        cat ${PWD}/config.log
+        cat ${TEMP_FOLDER}/config.log
         echo ""
-        cat ${PWD}/conf.d/config.toml
+        cat ${TEMP_FOLDER}/conf.d/config.toml
     fi
 }
 
