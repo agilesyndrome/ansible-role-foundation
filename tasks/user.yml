@@ -14,10 +14,10 @@
 
 - name: Create support folder structure
   file:
-    path: "{{foundation_supportroot}}"
+    path: "{{ foundation_supportroot }}/{{ item }}"
     state: directory
-    owner: "{{foundation_appuser}}"
-    group: "{{foundation_appuser}}"
+    owner: "{{ foundation_appuser }}"
+    group: "{{ foundation_appuser }}"
   with_items:
     - .ssh
     - bin
