@@ -1,5 +1,9 @@
 # This file was generated with the system Image. Do not modify.
+
 export IMAGE_BUILD_NAME="{{ packer_build_name }}"
 export IMAGE_BUILD_TYPE="{{ packer_builder_type }}"
-export IMAGE_NAME="{{ image }}"
 export IMAGE_CREATED="{{ created }}"
+export AWS_REGION="{{ aws_region }}"
+export AWS_DEFAULT_REGION="{{ aws_region }}"
+export Project="{{ image }}"
+export Environment=$(coalesce Environment tag env development)
