@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 TEMPLATE=${1}
+BACKEND=${2:-ssm}
 
 if [ -z "${TEMPLATE}" ]; then
     echo "Usage: ${0} template_name"
@@ -12,4 +13,4 @@ if [ ! -f ~/config/${TEMPLATE} ]; then
     exit 1
 fi
 
-cat ~/config/${TEMPLATE} | configfile ssm | bash >> ~/log/image.log
+cat ~/config/${TEMPLATE} | configfile ${BACKEND} | bash >> ~/log/image.log
