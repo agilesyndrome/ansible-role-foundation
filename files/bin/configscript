@@ -8,8 +8,8 @@ if [ -z "${TEMPLATE}" ]; then
 fi
 
 if [ ! -f ~/config/${TEMPLATE} ]; then
-    echo "~/${TEMPLATE} file does not exist"
+    echo "~/config/${TEMPLATE} file does not exist"
     exit 1
 fi
 
-~/config/${TEMPLATE} | configfile ssm | bash >> ~/log/image.log
+cat ~/config/${TEMPLATE} | configfile ssm | bash >> ~/log/image.log

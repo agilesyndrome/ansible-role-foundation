@@ -48,3 +48,9 @@
     dest: "{{foundation_supportroot}}/config/env-global"
     owner: "{{foundation_appuser}}"
     group: "{{foundation_appuser}}"
+
+- name: Create an image log file
+  file:
+    path: "{{foundation_supportroot}}/log/image.log"
+    owner: "{{foundation_appuser}}"
+    group: "{{foundation_appuser}}"
