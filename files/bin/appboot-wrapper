@@ -1,21 +1,9 @@
 #!/bin/bash
-
+set -e
 ## appboot-wrapper
 ##    Single entrypoint, multiple possibilities.
 
-## In Docker, /bin/appboot-wrapper (this file) becomes the Dockerfile's CMD statement: CMD [/bin/appboot-wrapper]
-## In AMI, a SystemD init script will be created that executes this file for startup commands.
-
-# [Step 1] Source necessary env vars
-. /etc/environment
-
-# [Step 2] Download any required remote artifacts
-if [ -z "${IMAGE_SKIP_ARTIFACT}" ]; then
-    /bin/fetch-artifacts
-fi
-
-# [Step 3] Run app specific configuration requirements
-/bin/conf-update
-
-# [Step 4] Boot application
-/bin/appboot
+. configscript env
+configscript fetch
+configscript configure
+configscript start

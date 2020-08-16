@@ -1,2 +1,0 @@
-# This file is auto generated. 
-echo '# {{getv "/hostname" "localhost"}}' | configfile env

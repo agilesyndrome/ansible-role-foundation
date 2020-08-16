@@ -20,9 +20,8 @@
   vars:
     pip_packages:
       - awscli
-- include_tasks: tasks/appbot.yml
-- include_tasks: tasks/binfiles.yml
-- include_tasks: tasks/appboot.yml
+- include_tasks: tasks/root.yml
+- include_tasks: tasks/user.yml
 - include_tasks: tasks/confd.yml
-- include_tasks: tasks/env_vars.yml
+- include_tasks: tasks/env_vars.yml <-- fix here
 - include_tasks: tasks/systemd.yml

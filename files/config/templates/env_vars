@@ -1,3 +1,0 @@
-# Setting Env Vars
-{{range gets "/*"}}
-export {{base .Key}}='{{.Value}}'{{end}}

@@ -6,31 +6,4 @@
     dest: '/bin/confd'
     checksum: 'sha256:255d2559f3824dd64df059bdc533fd6b697c070db603c76aaf8d1d5e6b0cc334'
     mode: 0755
-- name: Create confd template directory
-  become: yes
-  become_user: root
-  file:
-    path: '/config/templates'
-    state: directory
-    owner: appbot
-    group: appbot
-- name: Create confd configuration directory
-  become: yes
-  become_user: root
-  file:
-    path: '/config/conf.d'
-    state: directory
-    owner: appbot
-    group: appbot
-- name: Make /etc/confd folder
-  file:
-    path: /etc/confd
-    state: directory
-    owner: root
-    group: root
-- name: Fetch global conf.d configuration
-  copy:
-    src: config/
-    dest: /config/
-    owner: appbot
-    group: appbot
+

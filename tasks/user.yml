@@ -1,0 +1,43 @@
+- name: Add Appbot user
+  user:
+    name: "{{ foudnation_appuser | default('appbot') }}"
+    home: "{{foundation_supportroot}}"
+    shell: /bin/bash
+    uid: 1001
+
+- name: Create app root directory
+  file:
+    path: "{{foundation_approot}}"
+    state: directory
+    owner: "{{foundation_appuser}}"
+    group: "{{foundation_appuser}}"
+
+- name: Create support folder structure
+  file:
+    path: "{{foundation_supportroot}}"
+    state: directory
+    owner: "{{foundation_appuser}}"
+    group: "{{foundation_appuser}}"
+  with_items:
+    - .ssh
+    - bin
+    - config
+    - log
+    - run
+
+- name: ensure github.com is a known host
+  lineinfile:
+    dest: "{{foundation_supportroot}}/.ssh/known_hosts"
+    create: yes
+    state: present
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+    regexp: "^github\\.com"
+
+- name: Copy user boilerplates
+  copy:
+    src: "{{item}}/"
+    dest: "{{foundation_supportroot}}/{{item}}"
+    owner: "{{foundation_appuser}}"
+    group: "{{foundation_appuser}}"
+  with_items:
+    - config

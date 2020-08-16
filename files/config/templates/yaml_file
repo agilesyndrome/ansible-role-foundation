@@ -1,4 +1,0 @@
----
-database:
-  - user: {{getv "/db/user"}}
-  - password: {{getv "/db/password"}}
