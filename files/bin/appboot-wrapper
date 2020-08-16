@@ -3,8 +3,7 @@ set -e
 ## appboot-wrapper
 ##    Single entrypoint, multiple possibilities.
 
-. configscript env-global env
-. configscript env
+. /workspace/config/env-global
 configscript fetch
 configscript configure
 configscript start
