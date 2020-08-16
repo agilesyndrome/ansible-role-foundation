@@ -51,6 +51,7 @@
 
 - name: Create an image log file
   file:
+    state: touch
     path: "{{foundation_supportroot}}/log/image.log"
     owner: "{{foundation_appuser}}"
     group: "{{foundation_appuser}}"
