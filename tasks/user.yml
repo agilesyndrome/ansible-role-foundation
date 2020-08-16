@@ -41,3 +41,10 @@
     group: "{{foundation_appuser}}"
   with_items:
     - config
+
+- name: Copy env var template into place.
+  template:
+    src: "envvars.j2"
+    dest: "{{foundation_supportroot}}/config/env-global"
+    owner: "{{foundation_appuser}}"
+    group: "{{foundation_appuser}}"

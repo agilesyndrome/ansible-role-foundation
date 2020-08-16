@@ -23,5 +23,6 @@
 - include_tasks: tasks/root.yml
 - include_tasks: tasks/user.yml
 - include_tasks: tasks/confd.yml
-- include_tasks: tasks/env_vars.yml <-- fix here
-- include_tasks: tasks/systemd.yml
+
+- include_tasks: tasks/only-ami.yml
+  when: packer_build_name == "ami"
