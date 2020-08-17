@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include syndrome-foundation"
+      include_role:
+        name: "syndrome-foundation"
