@@ -5,5 +5,5 @@ export IMAGE_BUILD_TYPE="{{ packer_builder_type }}"
 export IMAGE_CREATED="{{ created }}"
 export AWS_REGION="{{ aws_region }}"
 export AWS_DEFAULT_REGION="{{ aws_region }}"
-export Project="$(coalesce Project tag env {{ image }}"
+export Project="$(coalesce Project tag env {{ image }})"
 export Environment=$(coalesce Environment tag env development)
