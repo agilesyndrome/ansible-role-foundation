@@ -1,23 +1,23 @@
 TARGET=${TARGET:-/workspace/app}
-PROJECT=${1}
+Project=${1}
 BRANCH=${2:-master}
 BUILD=${3-latest}
 
 mkdir -p ${TARGET}
 
-if [ -z "${PROJECT}" ]; then
+if [ -z "${Project}" ]; then
   echo "Usage: ${0} project [master or feature/branch_name] [build_number or latest]"
   echo "       ${0} project_name 'feature/feature_name' 99"
   exit 1
 fi
 
 if [ "${BUILD}" == "latest" ]; then
-  echo "Fetching latest build for ${PROJECT}/${BRANCH}"
-  BUILD=$(aws s3 cp ${S3_BUCKET}/${PROJECT}/${BRANCH}/latest.txt - | sed 's/\.tar\.gz//')
+  echo "Fetching latest build for ${Project}/${BRANCH}"
+  BUILD=$(aws s3 cp ${S3_BUCKET}/${Project}/${BRANCH}/latest.txt - | sed 's/\.tar\.gz//')
 fi
 
-echo "Downloading ${S3_BUCKET}/${PROJECT}/${BRANCH}/${BUILD}.tar.gz"
+echo "Downloading ${S3_BUCKET}/${Project}/${BRANCH}/${BUILD}.tar.gz"
 
 rm -f artifact.tar.gz #just in case
-aws s3 cp ${S3_BUCKET}/${PROJECT}/${BRANCH}/${BUILD}.tar.gz artifact.tar.gz
+aws s3 cp ${S3_BUCKET}/${Project}/${BRANCH}/${BUILD}.tar.gz artifact.tar.gz
 tar -C ${TARGET} -xzvf artifact.tar.gz
