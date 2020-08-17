@@ -3,3 +3,6 @@
 foundation_appuser: appbot
 foundation_approot: /workspace
 foundation_supportroot: /workspace
+apt_key_urls: []
+apt_repositories: []
+apt_packages: []
