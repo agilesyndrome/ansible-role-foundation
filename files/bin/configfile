@@ -85,7 +85,7 @@ esac
 
 process ${config_scope}
 
-mv ${TEMP_FOLDER}/config.log ~/config.oog
+mv ${TEMP_FOLDER}/config.log ~/log/config.oog
 
 # Cleanup Time
 if [ -d ${TEMP_FOLDER} ]; then
