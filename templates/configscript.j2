@@ -1,0 +1,16 @@
+#!/bin/bash
+set -ex
+TEMPLATE=${1}
+BACKEND=${2:-ssm}
+
+if [ -z "${TEMPLATE}" ]; then
+    echo "Usage: ${0} template_name"
+    exit 1
+fi
+
+if [ ! -f {{ foundation_supportroot }}/config/${TEMPLATE} ]; then
+    echo "{{ foundation_supportroot }}/config/${TEMPLATE} file does not exist"
+    exit 1
+fi
+
+cat {{ foundation_supportroot }}/config/${TEMPLATE} | configfile ${BACKEND} | bash >> {{ foundation_supportroot }}/log/image.log

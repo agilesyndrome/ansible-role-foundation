@@ -6,3 +6,15 @@
     group: root
     mode: '0755'
 
+- name: Process bin templates
+  template:
+    src: "{{ item }}.j2"
+    dest: /bin/{{ item }}
+    owner: root
+    group: root
+    mode: '0755'
+  with_items:
+    - appboot-wrapper
+    - configscript
+
+
