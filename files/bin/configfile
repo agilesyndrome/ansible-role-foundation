@@ -21,19 +21,17 @@ function usage {
 
 
 function process {
-    config_prefix=$(echo $1 | tr '[:upper:]' '[:lower:]')
+
+    config_prefix=$1
     TEMP_FOLDER=$(mktemp -d)
     mkdir -p ${TEMP_FOLDER}/conf.d ${TEMP_FOLDER}/templates
     cd ${TEMP_FOLDER}
 
-    
     cat /dev/stdin > ${TEMP_FOLDER}/templates/config.tmpl
 
     if [ ! -f "${TEMP_FOLDER}/templates/config.tmpl" ]; then
         usage
     fi
-
-    
 
     standard_template > ${PWD}/conf.d/config.toml
     confd --onetime -confdir ${PWD} -backend ${backend} --prefix ${config_prefix} >${PWD}/config.log 2> ${PWD}/config.log

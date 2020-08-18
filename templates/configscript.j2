@@ -4,6 +4,8 @@ TEMPLATE=${1}
 BACKEND=${2:-ssm}
 ZONE=${3}
 
+. {{ foundation_supportroot }}/config/env-global
+
 if [ -z "${TEMPLATE}" ]; then
     echo "Usage: ${0} template_name"
     exit 1
@@ -14,4 +16,10 @@ if [ ! -f {{ foundation_supportroot }}/config/${TEMPLATE} ]; then
     exit 1
 fi
 
-cat {{ foundation_supportroot }}/config/${TEMPLATE} | configfile ${BACKEND} ${ZONE} | bash >> {{ foundation_supportroot }}/log/image.log
+
+TMP_SCRIPT=$(mktemp)
+cat {{ foundation_supportroot }}/config/${TEMPLATE} | configfile ${BACKEND} ${ZONE} > ${TMP_SCRIPT}
+chmod +x ${TMP_SCRIPT}
+${TMP_SCRIPT} > ~/template.log
+
+rm -f ${TMP_SCRIPT}

@@ -7,7 +7,7 @@ sources=${@}
 
 function check_env {
     # VAR Names are Uppercase, Hypen separated
-    ENV_VAR=$(echo ${1} | tr '[:lower:]' '[:upper:]' | sed 's/[^[:alnum:]]/_/g')
+    ENV_VAR=$(echo ${1} | sed 's/[^[:alnum:]]/_/g')
     echo ${!ENV_VAR}
 }
 
